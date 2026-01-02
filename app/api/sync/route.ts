@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     "id,name,icsUrl,enabled,icon"
   );
 
-  const settingsRow = await DB.prepare(
+  const settingsRow: any = await DB.prepare(
     "SELECT theme,showCompletedTodos,calendarRefreshMinutes,suggestDates,suggestHabits,suggestTimeIntent FROM settings WHERE user_id = ?"
   )
     .bind(userId)
