@@ -17,6 +17,28 @@ const ensureAuth = (req: NextRequest, password?: string) => {
 const jsonError = (message: string, status = 400) =>
   NextResponse.json({ error: message }, { status });
 
+async function ensureSchema(DB: any) {
+  const alters = [
+    'ALTER TABLE todos ADD COLUMN updatedAt TEXT',
+    'ALTER TABLE todos ADD COLUMN order_num INTEGER',
+    'ALTER TABLE todos ADD COLUMN createdAt TEXT',
+    'ALTER TABLE todos ADD COLUMN user_id TEXT DEFAULT "default"',
+    'ALTER TABLE habits ADD COLUMN createdAt TEXT',
+    'ALTER TABLE habits ADD COLUMN updatedAt TEXT',
+    'ALTER TABLE habits ADD COLUMN user_id TEXT DEFAULT "default"',
+    'ALTER TABLE habit_logs ADD COLUMN updatedAt TEXT',
+    'ALTER TABLE habit_logs ADD COLUMN user_id TEXT DEFAULT "default"',
+    'ALTER TABLE calendar_sources ADD COLUMN user_id TEXT DEFAULT "default"',
+  ];
+  for (const stmt of alters) {
+    try {
+      await DB.prepare(stmt).run();
+    } catch {
+      // Ignore if column already exists.
+    }
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { env } = getRequestContext();
@@ -24,6 +46,8 @@ export async function GET(request: NextRequest) {
     const PASSWORD = (env as any)?.APP_PASSWORD as string | undefined;
     if (!DB) return jsonError("Missing database binding", 500);
     if (!ensureAuth(request, PASSWORD)) return unauthorized();
+    await ensureSchema(DB);
+    await ensureSchema(DB);
 
   const since = request.nextUrl.searchParams.get("since") || "0000";
   const userId = "default";
