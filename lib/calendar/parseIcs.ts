@@ -16,6 +16,9 @@ export const parseIcs = (icsText: string) => {
 
   return events.map((event) => {
     const vevent = new ICAL.Event(event);
+    const status = vevent.component.getFirstPropertyValue("status") as
+      | string
+      | undefined;
     const start = vevent.startDate?.toJSDate();
     const end = vevent.endDate?.toJSDate();
     const allDay = vevent.startDate?.isDate ?? false;
@@ -25,7 +28,7 @@ export const parseIcs = (icsText: string) => {
       start: start ?? new Date(),
       end: end ?? start ?? new Date(),
       allDay,
-      status: vevent.status,
+      status,
     } satisfies ParsedEvent;
   });
 };
