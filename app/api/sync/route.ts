@@ -1,37 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getRequestContext } from "@cloudflare/next-on-pages";
 
 export const runtime = "edge";
 export const preferredRegion = "iad1";
 export const maxDuration = 10;
 
-type D1Database = {
-  prepare: (query: string) => {
-    bind: (...values: unknown[]) => {
-      run: () => Promise<unknown>;
-      all: () => Promise<{ results: any[] }>;
-      first: <T = unknown>() => Promise<T | null>;
-    };
-  };
-};
-
-const DB = process.env.DB as unknown as D1Database | undefined;
-const PASSWORD = process.env.APP_PASSWORD;
-
 const unauthorized = () =>
   NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-const ensureAuth = (req: NextRequest) => {
-  if (!PASSWORD) return true;
+const ensureAuth = (req: NextRequest, password?: string) => {
+  if (!password) return true;
   const cookie = req.cookies.get("app_auth")?.value;
-  return cookie === PASSWORD;
+  return cookie === password;
 };
 
 const jsonError = (message: string, status = 400) =>
   NextResponse.json({ error: message }, { status });
 
 export async function GET(request: NextRequest) {
+  const { env } = getRequestContext();
+  const DB = (env as any).DB as any;
+  const PASSWORD = (env as any).APP_PASSWORD as string | undefined;
   if (!DB) return jsonError("Missing database binding", 500);
-  if (!ensureAuth(request)) return unauthorized();
+  if (!ensureAuth(request, PASSWORD)) return unauthorized();
 
   const since = request.nextUrl.searchParams.get("since") || "0000";
   const userId = "default";
@@ -102,8 +93,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const { env } = getRequestContext();
+  const DB = (env as any).DB as any;
+  const PASSWORD = (env as any).APP_PASSWORD as string | undefined;
   if (!DB) return jsonError("Missing database binding", 500);
-  if (!ensureAuth(request)) return unauthorized();
+  if (!ensureAuth(request, PASSWORD)) return unauthorized();
 
   let payload: any;
   try {
