@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 
 export const runtime = "edge";
+export const preferredRegion = "iad1";
+export const maxDuration = 10;
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
