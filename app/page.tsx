@@ -343,7 +343,6 @@ export default function Home() {
           setSuggestDates(settings.suggestDates ?? true);
           setSuggestHabits(settings.suggestHabits ?? true);
           setSuggestTimeIntent(settings.suggestTimeIntent ?? false);
-          setStylePreset(settings.stylePreset ?? "minimal");
           setTheme(settings.theme);
         }}
         lastCalendarSync={lastCalendarSync ?? undefined}
