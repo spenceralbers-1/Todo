@@ -32,8 +32,10 @@ const SYNC_URL = "/api/sync";
 export async function pullRemoteSnapshot(): Promise<SyncBundle | null> {
   try {
     const res = await fetch(SYNC_URL, { credentials: "include" });
+    const data = await res.json();
     if (!res.ok) return null;
-    return (await res.json()) as SyncBundle;
+    if (data && typeof data === "object" && "error" in data) return null;
+    return data as SyncBundle;
   } catch {
     return null;
   }
