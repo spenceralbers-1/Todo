@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+import { pushChanges } from "../sync/remote";
 import { getDb } from "./db";
 import type {
   CalendarSource,
@@ -25,6 +26,7 @@ export const todoRepo = {
       updatedAt: nowIso(),
     };
     await db.put("todos", item);
+    void pushChanges({ todos: [item] });
     return item;
   },
   async update(id: string, patch: Partial<TodoItem>) {
@@ -35,11 +37,13 @@ export const todoRepo = {
     }
     const updated = { ...existing, ...patch, updatedAt: nowIso() };
     await db.put("todos", updated);
+    void pushChanges({ todos: [updated] });
     return updated;
   },
   async remove(id: string) {
     const db = await getDb();
     await db.delete("todos", id);
+    void pushChanges({ deletedTodos: [id] });
   },
 };
 
@@ -58,6 +62,7 @@ export const habitRepo = {
       updatedAt: nowIso(),
     };
     await db.put("habits", habit);
+    void pushChanges({ habits: [habit] });
     return habit;
   },
   async update(id: string, patch: Partial<Habit>) {
@@ -68,11 +73,13 @@ export const habitRepo = {
     }
     const updated = { ...existing, ...patch, updatedAt: nowIso() };
     await db.put("habits", updated);
+    void pushChanges({ habits: [updated] });
     return updated;
   },
   async remove(id: string) {
     const db = await getDb();
     await db.delete("habits", id);
+    void pushChanges({ deletedHabits: [id] });
   },
 };
 
@@ -95,6 +102,7 @@ export const habitLogRepo = {
       ? { ...existing, count: input.count, updatedAt: nowIso() }
       : { ...input, id: nanoid(), updatedAt: nowIso() };
     await db.put("habitLogs", record);
+    void pushChanges({ habitLogs: [record] });
     return record;
   },
 };
@@ -108,6 +116,7 @@ export const calendarRepo = {
     const db = await getDb();
     const source: CalendarSource = { ...input, id: nanoid() };
     await db.put("calendarSources", source);
+    void pushChanges({ calendarSources: [source] });
     return source;
   },
   async update(id: string, patch: Partial<CalendarSource>) {
@@ -118,11 +127,13 @@ export const calendarRepo = {
     }
     const updated = { ...existing, ...patch };
     await db.put("calendarSources", updated);
+    void pushChanges({ calendarSources: [updated] });
     return updated;
   },
   async remove(id: string) {
     const db = await getDb();
     await db.delete("calendarSources", id);
+    void pushChanges({ deletedCalendarSources: [id] });
   },
 };
 
@@ -148,5 +159,6 @@ export const settingsRepo = {
   async set(next: Settings) {
     const db = await getDb();
     await db.put("settings", { ...next, key: "settings" });
+    void pushChanges({ settings: next });
   },
 };

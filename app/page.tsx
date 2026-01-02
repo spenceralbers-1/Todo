@@ -8,6 +8,7 @@ import { buildDateRange } from "@/lib/date/range";
 import { dateKey } from "@/lib/date/dateKey";
 import { calendarRepo, habitLogRepo, habitRepo, settingsRepo, todoRepo } from "@/lib/storage/repos";
 import { isHabitDue } from "@/lib/habits/isHabitDue";
+import { applyRemoteSnapshot, pullRemoteSnapshot } from "@/lib/sync/remote";
 import type { CalendarSource, Habit, HabitLog, TodoItem } from "@/lib/storage/types";
 import { fetchIcsWithProxy } from "@/lib/calendar/fetchIcs";
 import { parseIcs } from "@/lib/calendar/parseIcs";
@@ -44,96 +45,62 @@ export default function Home() {
     return dateKey(d);
   }, [today]);
 
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all(
+  const loadLocalData = async () => {
+    const todosEntries = await Promise.all(
       dateRange.map(async (date) => {
         const key = dateKey(date);
         const todos = await todoRepo.listByDate(key);
         return [key, todos] as const;
       })
-    ).then((entries) => {
-      if (cancelled) {
-        return;
-      }
-      const next: Record<string, TodoItem[]> = {};
-      entries.forEach(([key, todos]) => {
-        next[key] = todos;
-      });
-      setTodosByDate(next);
+    );
+    const nextTodos: Record<string, TodoItem[]> = {};
+    todosEntries.forEach(([key, todos]) => {
+      nextTodos[key] = todos;
     });
+    setTodosByDate(nextTodos);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [dateRange]);
+    const items = await habitRepo.list();
+    setHabits(items);
 
-  useEffect(() => {
-    let cancelled = false;
-    habitRepo.list().then((items) => {
-      if (cancelled) {
-        return;
-      }
-      setHabits(items);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all(
+    const logsEntries = await Promise.all(
       dateRange.map(async (date) => {
         const key = dateKey(date);
         const logs = await habitLogRepo.listByDate(key);
         return [key, logs] as const;
       })
-    ).then((entries) => {
-      if (cancelled) {
-        return;
-      }
-      const next: Record<string, HabitLog[]> = {};
-      entries.forEach(([key, logs]) => {
-        next[key] = logs;
-      });
-      setHabitLogsByDate(next);
+    );
+    const nextLogs: Record<string, HabitLog[]> = {};
+    logsEntries.forEach(([key, logs]) => {
+      nextLogs[key] = logs;
     });
+    setHabitLogsByDate(nextLogs);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [dateRange]);
+    const sources = await calendarRepo.list();
+    setCalendarSources(sources);
 
-  useEffect(() => {
-    let cancelled = false;
-    calendarRepo.list().then((sources) => {
-      if (cancelled) {
-        return;
-      }
-      setCalendarSources(sources);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    const settings = await settingsRepo.get();
+    setShowCompletedTodos(settings.showCompletedTodos);
+    setSuggestDates(settings.suggestDates ?? true);
+    setSuggestHabits(settings.suggestHabits ?? true);
+    setSuggestTimeIntent(settings.suggestTimeIntent ?? false);
+    setTheme(settings.theme);
+  };
 
   useEffect(() => {
     let cancelled = false;
-    settingsRepo.get().then((settings) => {
-      if (cancelled) {
-        return;
+    (async () => {
+      const snapshot = await pullRemoteSnapshot();
+      if (cancelled) return;
+      if (snapshot) {
+        await applyRemoteSnapshot(snapshot);
       }
-      setShowCompletedTodos(settings.showCompletedTodos);
-      setSuggestDates(settings.suggestDates ?? true);
-      setSuggestHabits(settings.suggestHabits ?? true);
-      setSuggestTimeIntent(settings.suggestTimeIntent ?? false);
-      setTheme(settings.theme);
-    });
+      if (cancelled) return;
+      await loadLocalData();
+    })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [dateRange, setTheme]);
 
   useEffect(() => {
     let cancelled = false;
