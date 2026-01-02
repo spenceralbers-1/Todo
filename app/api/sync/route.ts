@@ -84,7 +84,8 @@ export async function GET(request: NextRequest) {
 
     const todos = await fetchAll(
       "todos",
-      "id,title,notes,linkUrl,icon,date,completedAt,originDate,dismissedOnDate,order_num as \"order\",createdAt,updatedAt"
+      "id,title,notes,linkUrl,icon,date,completedAt,originDate,dismissedOnDate,order_num as \"order\",createdAt,updatedAt",
+      "id,title,notes,linkUrl,icon,date,completedAt,originDate,dismissedOnDate,order_num as \"order\",createdAt"
     );
     const habits = await fetchAll(
       "habits",
