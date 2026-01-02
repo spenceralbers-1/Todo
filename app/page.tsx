@@ -16,7 +16,7 @@ import { bucketEventsByDate, normalizeEvents } from "@/lib/calendar/normalizeEve
 import type { CalendarEvent } from "@/lib/calendar/types";
 
 export default function Home() {
-  const today = new Date();
+  const [today] = useState(() => new Date());
   const [recenterSignal, setRecenterSignal] = useState(0);
   const [todosByDate, setTodosByDate] = useState<Record<string, TodoItem[]>>(
     {}
@@ -100,7 +100,7 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, [dateRange, setTheme]);
+  }, [setTheme]);
 
   useEffect(() => {
     let cancelled = false;
