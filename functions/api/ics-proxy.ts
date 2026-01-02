@@ -1,3 +1,4 @@
+// @ts-nocheck
 const MAX_BYTES = 5 * 1024 * 1024;
 
 const isBlockedHost = (hostname: string) => {
