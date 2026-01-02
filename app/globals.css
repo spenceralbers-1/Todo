@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f7f5f0;
+  --foreground: #161616;
+  --panel: #ffffff;
+  --border: rgba(18, 18, 18, 0.12);
+  --muted: #5a5a5a;
+  --weekend: rgba(242, 236, 226, 0.85);
+}
+
+.dark {
+  --background: #0b0b0d;
+  --foreground: #f3f3f3;
+  --panel: #15161a;
+  --border: rgba(255, 255, 255, 0.12);
+  --muted: #a7a7ad;
+  --weekend: rgba(28, 29, 34, 0.9);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-panel: var(--panel);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
