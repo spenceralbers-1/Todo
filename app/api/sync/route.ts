@@ -47,17 +47,37 @@ export async function GET(request: NextRequest) {
     if (!DB) return jsonError("Missing database binding", 500);
     if (!ensureAuth(request, PASSWORD)) return unauthorized();
     await ensureSchema(DB);
-    await ensureSchema(DB);
 
     const since = request.nextUrl.searchParams.get("since") || "0000";
     const userId = "default";
 
-    const fetchAll = async (table: string, select: string) => {
-      const stmt = DB.prepare(
-        `SELECT ${select} FROM ${table} WHERE user_id = ? AND updatedAt > ?`
-      ).bind(userId, since);
-      const result = await stmt.all();
-      return result?.results ?? [];
+    const fetchAll = async (
+      table: string,
+      select: string,
+      fallbackSelect: string
+    ) => {
+      try {
+        const stmt = DB.prepare(
+          `SELECT ${select} FROM ${table} WHERE user_id = ? AND updatedAt > ?`
+        ).bind(userId, since);
+        const result = await stmt.all();
+        return result?.results ?? [];
+      } catch {
+        await ensureSchema(DB);
+        const stmt = DB.prepare(
+          `SELECT ${fallbackSelect} FROM ${table} WHERE user_id = ?`
+        ).bind(userId);
+        const result = await stmt.all();
+        return (result?.results ?? []).map((row: any) => {
+          if (!("updatedAt" in row) || row.updatedAt === undefined) {
+            row.updatedAt = row.createdAt ?? new Date().toISOString();
+          }
+          if (!("createdAt" in row) || row.createdAt === undefined) {
+            row.createdAt = row.updatedAt ?? new Date().toISOString();
+          }
+          return row;
+        });
+      }
     };
 
     const todos = await fetchAll(
@@ -66,14 +86,17 @@ export async function GET(request: NextRequest) {
     );
     const habits = await fetchAll(
       "habits",
-      "id,title,notes,icon,schedule_json as scheduleJson,targetPerDay,enabled,createdAt,updatedAt"
+      "id,title,notes,icon,schedule_json as scheduleJson,targetPerDay,enabled,createdAt,updatedAt",
+      "id,title,notes,icon,schedule_json as scheduleJson,targetPerDay,enabled,createdAt"
     );
     const habitLogs = await fetchAll(
       "habit_logs",
-      "id,habitId,date,count,updatedAt"
+      "id,habitId,date,count,updatedAt",
+      "id,habitId,date,count,createdAt"
     );
     const calendarSources = await fetchAll(
       "calendar_sources",
+      "id,name,icsUrl,enabled,icon,createdAt,updatedAt",
       "id,name,icsUrl,enabled,icon"
     );
 
