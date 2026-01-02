@@ -50,7 +50,6 @@ export async function GET(request: NextRequest) {
     if (!ensureAuth(request, PASSWORD)) return unauthorized();
     await ensureSchema(DB);
 
-    const since = request.nextUrl.searchParams.get("since") || "0000";
     const userId = "default";
 
     const fetchAll = async (
@@ -60,8 +59,8 @@ export async function GET(request: NextRequest) {
     ) => {
       try {
         const stmt = DB.prepare(
-          `SELECT ${select} FROM ${table} WHERE user_id = ? AND updatedAt > ?`
-        ).bind(userId, since);
+          `SELECT ${select} FROM ${table} WHERE user_id = ?`
+        ).bind(userId);
         const result = await stmt.all();
         return result?.results ?? [];
       } catch {
@@ -100,7 +99,7 @@ export async function GET(request: NextRequest) {
     const calendarSources = await fetchAll(
       "calendar_sources",
       "id,name,icsUrl,enabled,icon,createdAt,updatedAt",
-      "id,name,icsUrl,enabled,icon"
+      "id,name,icsUrl,enabled,icon,createdAt,updatedAt"
     );
 
     const settingsStmt = DB.prepare(
