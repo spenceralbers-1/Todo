@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "export": "next build && next export"
+    "postbuild": "rm -rf .next/cache"
   },
   "dependencies": {
     "ical.js": "^2.2.1",
