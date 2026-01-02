@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { resolve } from "node:dns/promises";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
@@ -39,16 +38,6 @@ const validateUrl = async (rawUrl: string) => {
 
   if (isIpLiteral(url.hostname) && isPrivateIp(url.hostname)) {
     throw new Error("Private IPs are not allowed");
-  }
-
-  // Best-effort DNS check; if it fails, allow fetch to decide.
-  try {
-    const addresses = await resolve(url.hostname);
-    if (addresses.some((addr) => isPrivateIp(addr))) {
-      throw new Error("Private IPs are not allowed");
-    }
-  } catch {
-    // Ignore DNS lookup errors to avoid blocking valid public hosts.
   }
 
   return url;
