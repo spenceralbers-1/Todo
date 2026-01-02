@@ -49,8 +49,8 @@ export async function GET(request: NextRequest) {
     await ensureSchema(DB);
     await ensureSchema(DB);
 
-  const since = request.nextUrl.searchParams.get("since") || "0000";
-  const userId = "default";
+    const since = request.nextUrl.searchParams.get("since") || "0000";
+    const userId = "default";
 
     const fetchAll = async (table: string, select: string) => {
       const stmt = DB.prepare(
@@ -107,7 +107,9 @@ export async function GET(request: NextRequest) {
       settings,
     });
   } catch (error: any) {
-    return jsonError(error?.message || "Sync GET failed", 500);
+    const message =
+      typeof error?.message === "string" ? error.message : "Sync GET failed";
+    return jsonError(message, 500);
   }
 }
 
@@ -315,6 +317,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ok: true });
   } catch (error: any) {
-    return jsonError(error?.message || "Sync POST failed", 500);
+    const message =
+      typeof error?.message === "string" ? error.message : "Sync POST failed";
+    return jsonError(message, 500);
   }
 }
