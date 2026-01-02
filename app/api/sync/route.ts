@@ -53,18 +53,10 @@ export async function GET(request: NextRequest) {
     "id,name,icsUrl,enabled,icon"
   );
 
-  const settingsRow: any = await DB.prepare(
+  const settingsStmt = DB.prepare(
     "SELECT theme,showCompletedTodos,calendarRefreshMinutes,suggestDates,suggestHabits,suggestTimeIntent FROM settings WHERE user_id = ?"
-  )
-    .bind(userId)
-    .first<{
-      theme: string;
-      showCompletedTodos: number;
-      calendarRefreshMinutes: number;
-      suggestDates: number;
-      suggestHabits: number;
-      suggestTimeIntent: number;
-    }>();
+  ).bind(userId);
+  const settingsRow: any = await settingsStmt.first();
 
   const parsedHabits = habits.map((h: any) => ({
     ...h,
