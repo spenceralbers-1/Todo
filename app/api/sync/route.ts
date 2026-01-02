@@ -129,6 +129,11 @@ export async function POST(request: NextRequest) {
     const userId = "default";
 
     const upsertTodo = async (todo: any) => {
+      const v = (x: any) => (x === undefined ? null : x);
+      const orderVal =
+        typeof todo.order === "number" && Number.isFinite(todo.order)
+          ? todo.order
+          : null;
       const stmt = DB.prepare(
         `INSERT INTO todos (id,title,notes,linkUrl,icon,date,completedAt,originDate,dismissedOnDate,order_num,createdAt,updatedAt,user_id)
          VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13)
@@ -148,22 +153,24 @@ export async function POST(request: NextRequest) {
       ).bind(
         todo.id,
         todo.title,
-        todo.notes,
-        todo.linkUrl,
-        todo.icon,
+        v(todo.notes),
+        v(todo.linkUrl),
+        v(todo.icon),
         todo.date,
-        todo.completedAt,
-        todo.originDate,
-        todo.dismissedOnDate,
-        todo.order ?? null,
-        todo.createdAt,
-        todo.updatedAt,
+        v(todo.completedAt),
+        v(todo.originDate),
+        v(todo.dismissedOnDate),
+        orderVal,
+        todo.createdAt ?? new Date().toISOString(),
+        todo.updatedAt ?? new Date().toISOString(),
         userId
       );
       await stmt.run();
     };
 
     const upsertHabit = async (habit: any) => {
+      const enabledVal = habit.enabled ? 1 : 0;
+      const scheduleJson = JSON.stringify(habit.schedule ?? {});
       const stmt = DB.prepare(
         `INSERT INTO habits (id,title,notes,icon,schedule_json,targetPerDay,enabled,createdAt,updatedAt,user_id)
          VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10)
@@ -180,19 +187,23 @@ export async function POST(request: NextRequest) {
       ).bind(
         habit.id,
         habit.title,
-        habit.notes,
-        habit.icon,
-        JSON.stringify(habit.schedule ?? {}),
-        habit.targetPerDay,
-        habit.enabled ? 1 : 0,
-        habit.createdAt,
-        habit.updatedAt,
+        habit.notes ?? null,
+        habit.icon ?? null,
+        scheduleJson,
+        habit.targetPerDay ?? 1,
+        enabledVal,
+        habit.createdAt ?? new Date().toISOString(),
+        habit.updatedAt ?? new Date().toISOString(),
         userId
       );
       await stmt.run();
     };
 
     const upsertHabitLog = async (log: any) => {
+      const countVal =
+        typeof log.count === "number" && Number.isFinite(log.count)
+          ? log.count
+          : 0;
       const stmt = DB.prepare(
         `INSERT INTO habit_logs (id,habitId,date,count,updatedAt,user_id)
          VALUES (?1,?2,?3,?4,?5,?6)
@@ -202,11 +213,19 @@ export async function POST(request: NextRequest) {
            count=excluded.count,
            updatedAt=excluded.updatedAt,
            user_id=excluded.user_id`
-      ).bind(log.id, log.habitId, log.date, log.count, log.updatedAt, userId);
+      ).bind(
+        log.id,
+        log.habitId,
+        log.date,
+        countVal,
+        log.updatedAt ?? new Date().toISOString(),
+        userId
+      );
       await stmt.run();
     };
 
     const upsertCalendar = async (source: any) => {
+      const enabledVal = source.enabled ? 1 : 0;
       const stmt = DB.prepare(
         `INSERT INTO calendar_sources (id,name,icsUrl,enabled,icon,user_id)
          VALUES (?1,?2,?3,?4,?5,?6)
@@ -220,14 +239,15 @@ export async function POST(request: NextRequest) {
         source.id,
         source.name,
         source.icsUrl,
-        source.enabled ? 1 : 0,
-        source.icon,
+        enabledVal,
+        source.icon ?? null,
         userId
       );
       await stmt.run();
     };
 
     const upsertSettings = async (settings: any) => {
+      const theme = settings.theme ?? "system";
       const stmt = DB.prepare(
         `INSERT INTO settings (user_id,theme,showCompletedTodos,calendarRefreshMinutes,suggestDates,suggestHabits,suggestTimeIntent)
          VALUES (?1,?2,?3,?4,?5,?6,?7)
@@ -240,7 +260,7 @@ export async function POST(request: NextRequest) {
            suggestTimeIntent=excluded.suggestTimeIntent`
       ).bind(
         userId,
-        settings.theme,
+        theme,
         settings.showCompletedTodos ? 1 : 0,
         settings.calendarRefreshMinutes ?? 15,
         settings.suggestDates ? 1 : 0,
