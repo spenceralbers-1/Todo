@@ -1,9 +1,9 @@
 "use client";
 
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
 
-export default function UnlockPage() {
+function UnlockInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/";
@@ -12,7 +12,6 @@ export default function UnlockPage() {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    const target = (event.target as HTMLFormElement);
     const value = password.trim();
     if (!value) return;
     document.cookie = `app_auth=${value}; path=/; SameSite=Lax`;
@@ -41,5 +40,13 @@ export default function UnlockPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function UnlockPage() {
+  return (
+    <Suspense fallback={null}>
+      <UnlockInner />
+    </Suspense>
   );
 }
