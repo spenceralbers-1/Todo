@@ -36,6 +36,10 @@ export default function Home() {
   const [suggestTimeIntent, setSuggestTimeIntent] = useState(false);
   const [lastCalendarSync, setLastCalendarSync] = useState<string | null>(null);
   const { setTheme } = useTheme();
+  const shouldSyncRemote =
+    typeof window !== "undefined" &&
+    window.location.hostname !== "localhost" &&
+    window.location.hostname !== "127.0.0.1";
 
   const dateRange = useMemo(() => buildDateRange(today, 7, 14), [today]);
   const todayKey = useMemo(() => dateKey(today), [today]);
@@ -89,10 +93,12 @@ export default function Home() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const snapshot = await pullRemoteSnapshot();
-      if (cancelled) return;
-      if (snapshot) {
-        await applyRemoteSnapshot(snapshot);
+      if (shouldSyncRemote) {
+        const snapshot = await pullRemoteSnapshot();
+        if (cancelled) return;
+        if (snapshot) {
+          await applyRemoteSnapshot(snapshot);
+        }
       }
       if (cancelled) return;
       await loadLocalData();
@@ -100,7 +106,7 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, [setTheme]);
+  }, [setTheme, shouldSyncRemote]);
 
   useEffect(() => {
     let cancelled = false;
