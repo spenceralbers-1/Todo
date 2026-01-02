@@ -309,7 +309,7 @@ export function DayCard({
         </section>
       ) : null}
 
-      <section className="mt-4 rounded-2xl border border-border/70 bg-background/40">
+      <section className="mt-4 rounded-2xl border border-border/70 bg-background/40 overflow-hidden">
         <div className="divide-y divide-dashed divide-border/60">
           <div className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-muted flex items-center gap-2">
             <span className="text-base leading-none text-[color:var(--accent-tasks)]">Tasks</span>
