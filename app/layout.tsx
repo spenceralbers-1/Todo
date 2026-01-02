@@ -16,6 +16,25 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "To-Do",
   description: "Local-first day planner for daily focus.",
+  openGraph: {
+    title: "To-Do | Spencer Albers",
+    description: "Local-first day planner for daily focus.",
+    url: "https://todo.spenceralbers.com",
+    siteName: "To-Do",
+    images: [
+      {
+        url: "https://todo.spenceralbers.com/og.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "To-Do | Spencer Albers",
+    description: "Local-first day planner for daily focus.",
+    images: ["https://todo.spenceralbers.com/og.png"],
+  },
 };
 
 export default function RootLayout({
