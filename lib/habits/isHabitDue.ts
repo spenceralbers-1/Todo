@@ -1,6 +1,7 @@
 import type { Habit } from "@/lib/storage/types";
 
 export const isHabitDue = (habit: Habit, date: Date) => {
+  if (habit.enabled === false) return false;
   const day = date.getDay();
   switch (habit.schedule.type) {
     case "daily":

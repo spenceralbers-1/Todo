@@ -5,6 +5,9 @@ export type TodoItem = {
   notes?: string;
   linkUrl?: string;
   icon?: string;
+  originDate?: string;
+  dismissedOnDate?: string;
+  order?: number;
   completedAt?: string;
   createdAt: string;
   updatedAt: string;
@@ -22,6 +25,7 @@ export type Habit = {
   icon?: string;
   schedule: HabitSchedule;
   targetPerDay: number;
+  enabled?: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -46,4 +50,7 @@ export type Settings = {
   theme: "light" | "dark" | "system";
   showCompletedTodos: boolean;
   calendarRefreshMinutes: number;
+  suggestDates?: boolean;
+  suggestHabits?: boolean;
+  suggestTimeIntent?: boolean;
 };

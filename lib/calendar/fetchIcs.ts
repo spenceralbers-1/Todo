@@ -7,16 +7,16 @@ export const fetchIcs = async (url: string) => {
 };
 
 export const fetchIcsWithProxy = async (url: string) => {
-  try {
-    return await fetchIcs(url);
-  } catch (error) {
-    // Fall back to proxy on CORS/network errors.
-  }
-
+  // Prefer proxy to avoid CORS and cookie issues on calendar hosts.
   const proxyUrl = `/api/ics-proxy?url=${encodeURIComponent(url)}`;
-  const response = await fetch(proxyUrl);
-  if (!response.ok) {
-    throw new Error("Failed to fetch ICS via proxy");
+  try {
+    const response = await fetch(proxyUrl);
+    if (!response.ok) {
+      throw new Error("Failed via proxy");
+    }
+    return await response.text();
+  } catch (proxyError) {
+    // Fallback: direct fetch in environments that allow it.
+    return fetchIcs(url);
   }
-  return response.text();
 };

@@ -57,14 +57,29 @@ export const buildDailySummary = ({
   now = new Date(),
 }: SummaryInput) => {
   const greeting = getGreeting(now);
+  const name = "Spencer";
   const openTodos = todos.filter((todo) => !todo.completedAt).length;
   const meetingCount = meetings.length;
   const habitCount = habits.length;
   const freeAfter = formatFreeAfter(meetings, date, now);
 
-  return `${greeting}, Spencer. You have ${meetingCount} meeting${
-    meetingCount === 1 ? "" : "s"
-  }, ${openTodos} task${openTodos === 1 ? "" : "s"}, and ${habitCount} habit${
-    habitCount === 1 ? "" : "s"
-  } today. ${freeAfter}`;
+  const parts: string[] = [];
+  if (meetingCount > 0) {
+    parts.push(`${meetingCount} meeting${meetingCount === 1 ? "" : "s"}`);
+  }
+  if (openTodos > 0) {
+    parts.push(`${openTodos} task${openTodos === 1 ? "" : "s"}`);
+  }
+  if (habitCount > 0) {
+    parts.push(`${habitCount} habit${habitCount === 1 ? "" : "s"}`);
+  }
+
+  const listText =
+    parts.length === 0
+      ? "nothing scheduled today"
+      : new Intl.ListFormat("en", { style: "long", type: "conjunction" }).format(
+          parts
+        );
+
+  return `${greeting}, ${name}.\nYou have ${listText}. ${freeAfter}`;
 };

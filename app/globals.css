@@ -9,6 +9,9 @@
   --border: rgba(18, 18, 18, 0.12);
   --muted: #5a5a5a;
   --weekend: rgba(242, 236, 226, 0.85);
+  --accent-tasks: #34d399;
+  --accent-habits: #f59e0b;
+  --accent-calendar: #60a5fa;
 }
 
 .dark {
@@ -17,7 +20,10 @@
   --panel: #15161a;
   --border: rgba(255, 255, 255, 0.12);
   --muted: #a7a7ad;
-  --weekend: rgba(28, 29, 34, 0.9);
+  --weekend: #1f2230;
+  --accent-tasks: #34d399;
+  --accent-habits: #f59e0b;
+  --accent-calendar: #60a5fa;
 }
 
 @theme inline {
@@ -26,6 +32,9 @@
   --color-panel: var(--panel);
   --color-border: var(--border);
   --color-muted: var(--muted);
+  --color-accent-tasks: var(--accent-tasks);
+  --color-accent-habits: var(--accent-habits);
+  --color-accent-calendar: var(--accent-calendar);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

@@ -20,6 +20,7 @@ export const todoRepo = {
     const item: TodoItem = {
       ...input,
       id: nanoid(),
+      order: input.order,
       createdAt: nowIso(),
       updatedAt: nowIso(),
     };
@@ -51,6 +52,7 @@ export const habitRepo = {
     const db = await getDb();
     const habit: Habit = {
       ...input,
+      enabled: input.enabled ?? true,
       id: nanoid(),
       createdAt: nowIso(),
       updatedAt: nowIso(),
@@ -128,6 +130,9 @@ const DEFAULT_SETTINGS: Settings = {
   theme: "system",
   showCompletedTodos: true,
   calendarRefreshMinutes: 15,
+  suggestDates: true,
+  suggestHabits: true,
+  suggestTimeIntent: false,
 };
 
 export const settingsRepo = {

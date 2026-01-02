@@ -20,6 +20,14 @@ const isPrivateIp = (ip: string) => {
   return false;
 };
 
+const isIpLiteral = (hostname: string) => {
+  // Simple check for IPv4 or IPv6 literals
+  return (
+    /^[0-9.]+$/.test(hostname) ||
+    hostname.includes(":")
+  );
+};
+
 const validateUrl = async (rawUrl: string) => {
   const url = new URL(rawUrl);
   if (url.protocol !== "https:") {
@@ -28,10 +36,21 @@ const validateUrl = async (rawUrl: string) => {
   if (!url.hostname) {
     throw new Error("Invalid URL");
   }
-  const addresses = await resolve(url.hostname);
-  if (addresses.some((addr) => isPrivateIp(addr))) {
+
+  if (isIpLiteral(url.hostname) && isPrivateIp(url.hostname)) {
     throw new Error("Private IPs are not allowed");
   }
+
+  // Best-effort DNS check; if it fails, allow fetch to decide.
+  try {
+    const addresses = await resolve(url.hostname);
+    if (addresses.some((addr) => isPrivateIp(addr))) {
+      throw new Error("Private IPs are not allowed");
+    }
+  } catch {
+    // Ignore DNS lookup errors to avoid blocking valid public hosts.
+  }
+
   return url;
 };
 
@@ -51,6 +70,7 @@ export async function GET(request: Request) {
       signal: controller.signal,
       headers: {
         "User-Agent": "todo-ics-proxy",
+        Accept: "text/calendar,text/plain,*/*",
       },
     });
 
