@@ -28,6 +28,8 @@ async function ensureSchema(DB: any) {
     'ALTER TABLE habits ADD COLUMN user_id TEXT DEFAULT "default"',
     'ALTER TABLE habit_logs ADD COLUMN updatedAt TEXT',
     'ALTER TABLE habit_logs ADD COLUMN user_id TEXT DEFAULT "default"',
+    'ALTER TABLE calendar_sources ADD COLUMN createdAt TEXT',
+    'ALTER TABLE calendar_sources ADD COLUMN updatedAt TEXT',
     'ALTER TABLE calendar_sources ADD COLUMN user_id TEXT DEFAULT "default"',
   ];
   for (const stmt of alters) {
@@ -92,7 +94,7 @@ export async function GET(request: NextRequest) {
     const habitLogs = await fetchAll(
       "habit_logs",
       "id,habitId,date,count,updatedAt",
-      "id,habitId,date,count,createdAt"
+      "id,habitId,date,count,updatedAt"
     );
     const calendarSources = await fetchAll(
       "calendar_sources",
