@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRequestContext } from "@cloudflare/next-on-pages";
+// In production (Cloudflare Pages) we use getRequestContext to access bindings.
+// In local dev, fall back to process.env to avoid requiring the package.
+let getRequestContext: () => { env: any };
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  getRequestContext = require("@cloudflare/next-on-pages").getRequestContext;
+} catch {
+  getRequestContext = () => ({ env: process.env as any });
+}
 
 export const runtime = "edge";
 export const preferredRegion = "iad1";
